@@ -10,7 +10,6 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 const PACK_METHOD_DEFAULTS = {
   "Skid": 30,
-  "Box": 40,
   "Rack": 21,
   "Bin": 600,
   "Other": null,

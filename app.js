@@ -19,7 +19,6 @@ const STATUS_FLOW = {
 
 const UNITS_LABELS = {
   Skid: "Units per skid",
-  Box: "Units per box",
   Rack: "Units per rack",
   Bin: "Units per bin",
   Other: "Units per container",
