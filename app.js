@@ -295,6 +295,20 @@ async function handleFormSubmit(event) {
   }
 }
 
+async function deleteOrder(order) {
+  const confirmed = confirm(`Delete this order for ${order.customer}? This can't be undone.`);
+  if (!confirmed) return;
+
+  try {
+    await db.deleteOrder(order.id);
+    orders = orders.filter((o) => o.id !== order.id);
+    renderOrders();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete order. Try again.");
+  }
+}
+
 async function advanceStatus(order) {
   const nextStatus = STATUS_FLOW[order.status];
   if (!nextStatus) return;
@@ -413,6 +427,12 @@ function buildOrderCard(order) {
     btn.addEventListener("click", () => advanceStatus(order));
     actions.appendChild(btn);
   }
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "btn-status btn-delete";
+  deleteBtn.textContent = "Delete";
+  deleteBtn.addEventListener("click", () => deleteOrder(order));
+  actions.appendChild(deleteBtn);
 
   return node;
 }

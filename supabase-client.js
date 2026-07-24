@@ -70,6 +70,14 @@ const db = {
     return { ...order, lines: insertedLines };
   },
 
+  async deleteOrder(id) {
+    const { error } = await supabaseClient
+      .from("special_orders")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+  },
+
   async updateOrderStatus(id, status) {
     const { data, error } = await supabaseClient
       .from("special_orders")

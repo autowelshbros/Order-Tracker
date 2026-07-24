@@ -130,6 +130,16 @@ button, input, select, textarea {
   background: var(--color-bg);
 }
 
+.btn-delete {
+  background: var(--color-surface);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.btn-delete:active {
+  background: #fbeaea;
+}
+
 /* Toolbar */
 
 .toolbar {
