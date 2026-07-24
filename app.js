@@ -59,7 +59,8 @@ function cacheEls() {
   els.addLineBtn = document.getElementById("add-line-btn");
   els.lineTemplate = document.getElementById("order-line-template");
 
-  els.dueDateInput = document.getElementById("due-date-input");
+  els.shipDateInput = document.getElementById("ship-date-input");
+  els.packByDateInput = document.getElementById("pack-by-date-input");
   els.destinationInput = document.getElementById("destination-input");
   els.pickupLocationSelect = document.getElementById("pickup-location-select");
   els.notesInput = document.getElementById("notes-input");
@@ -121,7 +122,7 @@ function dayHeadingLabel(date) {
   });
 }
 
-function fullDueDateLabel(date) {
+function fullDateTimeLabel(date) {
   return date.toLocaleString(undefined, {
     weekday: "long",
     year: "numeric",
@@ -225,7 +226,8 @@ function openOrderModal(order) {
     els.saveOrderBtn.textContent = "Save Changes";
 
     els.customerSelect.value = order.customer;
-    els.dueDateInput.value = toDatetimeLocalValue(order.due_date);
+    els.shipDateInput.value = toDatetimeLocalValue(order.ship_date);
+    els.packByDateInput.value = order.pack_by_date ? toDatetimeLocalValue(order.pack_by_date) : "";
     els.destinationInput.value = order.destination || "";
     els.pickupLocationSelect.value = order.pickup_location || "";
     els.notesInput.value = order.notes || "";
@@ -273,7 +275,8 @@ async function handleFormSubmit(event) {
 
     const headerFields = {
       customer: customerName,
-      due_date: new Date(els.dueDateInput.value).toISOString(),
+      ship_date: new Date(els.shipDateInput.value).toISOString(),
+      pack_by_date: new Date(els.packByDateInput.value).toISOString(),
       destination: els.destinationInput.value.trim(),
       pickup_location: els.pickupLocationSelect.value || null,
       notes: els.notesInput.value.trim(),
@@ -343,10 +346,10 @@ function renderOrders() {
 
   let visible = orders.filter((o) => statusValue === "ALL" || o.status === statusValue);
   if (flaggedOnly) visible = visible.filter(orderHasFlaggedLine);
-  if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o.due_date)) === dayValue);
+  if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o.ship_date)) === dayValue);
 
   visible.sort((a, b) => {
-    const diff = new Date(a.due_date) - new Date(b.due_date);
+    const diff = new Date(a.ship_date) - new Date(b.ship_date);
     return sortDir === "asc" ? diff : -diff;
   });
 
@@ -355,13 +358,13 @@ function renderOrders() {
 
   let currentDayKey = null;
   for (const order of visible) {
-    const dueDate = new Date(order.due_date);
-    const dayKey = localDateKey(dueDate);
+    const shipDate = new Date(order.ship_date);
+    const dayKey = localDateKey(shipDate);
     if (dayKey !== currentDayKey) {
       currentDayKey = dayKey;
       const heading = document.createElement("h2");
       heading.className = "day-heading";
-      heading.textContent = dayHeadingLabel(dueDate);
+      heading.textContent = dayHeadingLabel(shipDate);
       els.orderList.appendChild(heading);
     }
     els.orderList.appendChild(buildOrderCard(order));
@@ -390,11 +393,22 @@ function buildOrderCard(order) {
     linesList.appendChild(lineNode);
   }
 
-  const dueEl = node.querySelector(".order-due");
-  const dueDate = new Date(order.due_date);
-  dueEl.textContent = `Due: ${fullDueDateLabel(dueDate)}`;
-  if (order.status !== "SHIPPED" && dueDate.getTime() < Date.now()) {
-    dueEl.classList.add("overdue");
+  const shipEl = node.querySelector(".order-ship-date");
+  const shipDate = new Date(order.ship_date);
+  shipEl.textContent = `Ship: ${fullDateTimeLabel(shipDate)}`;
+  if (order.status !== "SHIPPED" && shipDate.getTime() < Date.now()) {
+    shipEl.classList.add("overdue");
+  }
+
+  const packByEl = node.querySelector(".order-pack-by-date");
+  if (order.pack_by_date) {
+    const packByDate = new Date(order.pack_by_date);
+    packByEl.textContent = `Pack by: ${fullDateTimeLabel(packByDate)}`;
+    if (order.status === "OPEN" && packByDate.getTime() < Date.now()) {
+      packByEl.classList.add("overdue");
+    }
+  } else {
+    packByEl.textContent = "Pack by: not set";
   }
 
   const destEl = node.querySelector(".order-destination");

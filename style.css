@@ -305,15 +305,15 @@ textarea {
   display: none;
 }
 
-.order-due, .order-destination, .order-pickup-location, .order-notes, .order-meta {
+.order-ship-date, .order-pack-by-date, .order-destination, .order-pickup-location, .order-notes, .order-meta {
   margin: 4px 0;
 }
 
-.order-due {
+.order-ship-date, .order-pack-by-date {
   font-weight: 600;
 }
 
-.order-due.overdue {
+.order-ship-date.overdue, .order-pack-by-date.overdue {
   color: var(--color-danger);
 }
 

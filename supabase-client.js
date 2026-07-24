@@ -23,7 +23,7 @@ const db = {
     const { data, error } = await supabaseClient
       .from("special_orders")
       .select("*, lines:special_order_lines(*)")
-      .order("due_date", { ascending: true })
+      .order("ship_date", { ascending: true })
       .order("id", { foreignTable: "special_order_lines", ascending: true });
     if (error) throw error;
     return data;
