@@ -12,7 +12,7 @@ const PACK_METHOD_DEFAULTS = {
   "Skid": 30,
   "Box": 40,
   "Rack": 21,
-  "Bin": 21,
+  "Bin": 600,
   "Other": null,
 };
 

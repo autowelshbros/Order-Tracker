@@ -17,6 +17,18 @@ const STATUS_FLOW = {
   SHIPPED: null,
 };
 
+const UNITS_LABELS = {
+  Skid: "Units per skid",
+  Box: "Units per box",
+  Rack: "Units per rack",
+  Bin: "Units per bin",
+  Other: "Units per container",
+};
+
+function unitsLabelFor(method) {
+  return UNITS_LABELS[method] || "Units per pack";
+}
+
 let orders = [];
 let customers = [];
 let editingOrderId = null;
@@ -167,6 +179,7 @@ function addLineRow(line) {
   }
 
   const packMethodSelect = row.querySelector(".line-pack-method");
+  const unitsLabel = row.querySelector(".line-units-label");
   const unitsInput = row.querySelector(".line-units");
   const unitsHint = row.querySelector(".line-units-hint");
   const quantityInput = row.querySelector(".line-quantity");
@@ -176,6 +189,7 @@ function addLineRow(line) {
     const defaultUnits = PACK_METHOD_DEFAULTS[packMethodSelect.value];
     if (defaultUnits != null) unitsInput.value = defaultUnits;
     unitsHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+    unitsLabel.textContent = unitsLabelFor(packMethodSelect.value);
   });
 
   removeBtn.addEventListener("click", () => {
@@ -188,6 +202,7 @@ function addLineRow(line) {
     packMethodSelect.value = line.pack_method;
     const defaultUnits = PACK_METHOD_DEFAULTS[line.pack_method];
     unitsHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+    unitsLabel.textContent = unitsLabelFor(line.pack_method);
     unitsInput.value = line.units_per_pack;
     quantityInput.value = line.quantity;
   }
