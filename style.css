@@ -1,0 +1,386 @@
+:root {
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-border: #d7dbe0;
+  --color-text: #1c2126;
+  --color-text-muted: #5c6570;
+  --color-primary: #1a5fb4;
+  --color-primary-dark: #124a8f;
+  --color-danger: #c62828;
+  --color-warning-bg: #fff3cd;
+  --color-warning-border: #e0a800;
+  --color-warning-text: #7a5b00;
+
+  --status-open-bg: #e3e8ef;
+  --status-open-text: #33404d;
+  --status-packed-bg: #fdecc8;
+  --status-packed-text: #7a5200;
+  --status-shipped-bg: #d9f2e3;
+  --status-shipped-text: #1e6b3c;
+
+  --radius: 10px;
+  --tap-min: 44px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* Header */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* Buttons */
+
+.btn {
+  min-height: var(--tap-min);
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #ffffff;
+  color: var(--color-primary-dark);
+}
+
+.btn-primary:active {
+  background: #e8eef7;
+}
+
+.app-header .btn-primary {
+  background: #ffffff;
+}
+
+.modal-actions .btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary-dark);
+}
+
+.modal-actions .btn-primary:active {
+  background: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.btn-secondary:active {
+  background: var(--color-bg);
+}
+
+.btn-status {
+  min-height: var(--tap-min);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-status:active {
+  background: var(--color-primary-dark);
+}
+
+/* Toolbar */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 56px;
+  z-index: 9;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 140px;
+}
+
+.field-group label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-row .field-group {
+  flex: 1;
+}
+
+select, input[type="text"], input[type="number"], input[type="datetime-local"], textarea {
+  min-height: var(--tap-min);
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  width: 100%;
+}
+
+textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  display: flex;
+  min-height: var(--tap-min);
+}
+
+.checkbox-label input {
+  min-height: auto;
+  width: 20px;
+  height: 20px;
+}
+
+.flag-filter-group {
+  justify-content: flex-end;
+}
+
+/* Order list */
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.order-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.order-card.flagged {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.order-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.order-customer {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.order-product {
+  margin: 4px 0;
+  color: var(--color-text-muted);
+}
+
+.order-pack {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.flag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-warning-border);
+  color: #3a2b00;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.order-due, .order-destination, .order-notes, .order-meta {
+  margin: 4px 0;
+}
+
+.order-due {
+  font-weight: 600;
+}
+
+.order-due.overdue {
+  color: var(--color-danger);
+}
+
+.order-notes {
+  color: var(--color-text-muted);
+  white-space: pre-wrap;
+}
+
+.order-meta {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.order-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* Status badge */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge.status-open {
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+}
+
+.status-badge.status-packed {
+  background: var(--status-packed-bg);
+  color: var(--status-packed-text);
+}
+
+.status-badge.status-shipped {
+  background: var(--status-shipped-bg);
+  color: var(--status-shipped-text);
+}
+
+/* Empty / loading states */
+
+.empty-state {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 40px 16px;
+}
+
+/* Modal */
+
+.order-modal {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0;
+  width: min(520px, 92vw);
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.order-modal::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.order-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.order-modal h2 {
+  margin: 0 0 4px;
+}
+
+.hint {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  text-transform: none;
+}
+
+.form-error {
+  color: var(--color-danger);
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+  position: sticky;
+  bottom: 0;
+  background: var(--color-surface);
+  padding-top: 8px;
+}
+
+/* Small screens / handheld scanners (Zebra TC21 ~ 720px wide) */
+
+@media (max-width: 480px) {
+  .app-header h1 {
+    font-size: 1.1rem;
+  }
+
+  .toolbar {
+    top: 52px;
+    flex-direction: column;
+  }
+
+  .field-group {
+    flex: 1 1 auto;
+  }
+
+  .order-list {
+    padding: 10px;
+  }
+}

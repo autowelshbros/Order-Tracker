@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Order Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Order Tracker</h1>
+  <button id="new-order-btn" class="btn btn-primary">+ New Order</button>
+</header>
+
+<div class="toolbar">
+  <div class="field-group">
+    <label for="status-filter">Status</label>
+    <select id="status-filter">
+      <option value="ALL">All</option>
+      <option value="OPEN">Open</option>
+      <option value="PACKED">Packed</option>
+      <option value="SHIPPED">Shipped</option>
+    </select>
+  </div>
+
+  <div class="field-group">
+    <label for="sort-order">Due date</label>
+    <select id="sort-order">
+      <option value="asc">Soonest first</option>
+      <option value="desc">Latest first</option>
+    </select>
+  </div>
+
+  <div class="field-group flag-filter-group">
+    <label class="checkbox-label">
+      <input type="checkbox" id="flagged-only">
+      Flagged only
+    </label>
+  </div>
+</div>
+
+<main id="order-list" class="order-list" aria-live="polite"></main>
+
+<p id="empty-state" class="empty-state" hidden>No orders match these filters.</p>
+<p id="loading-state" class="empty-state">Loading orders&hellip;</p>
+
+<dialog id="order-modal" class="order-modal">
+  <form id="order-form" method="dialog">
+    <h2 id="modal-title">New Order</h2>
+
+    <div class="field-group">
+      <label for="customer-select">Customer</label>
+      <select id="customer-select" required>
+        <option value="" disabled selected>Select customer&hellip;</option>
+        <option value="__new__">+ Add new customer&hellip;</option>
+      </select>
+      <input type="text" id="new-customer-input" placeholder="New customer name" hidden>
+    </div>
+
+    <div class="field-group">
+      <label for="product-select">Product</label>
+      <select id="product-select" required>
+        <option value="" disabled selected>Select product&hellip;</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label for="pack-method-select">Pack method</label>
+      <select id="pack-method-select" required>
+        <option value="" disabled selected>Select pack method&hellip;</option>
+        <option value="Skid">Skid</option>
+        <option value="Box">Box</option>
+        <option value="5-Cob Rack">5-Cob Rack</option>
+        <option value="5-Cob Bin">5-Cob Bin</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label for="units-per-pack-input">
+          Units per pack
+          <span id="units-default-hint" class="hint"></span>
+        </label>
+        <input type="number" id="units-per-pack-input" min="0" required>
+      </div>
+
+      <div class="field-group">
+        <label for="quantity-input">Quantity</label>
+        <input type="number" id="quantity-input" min="1" required>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="due-date-input">Due date &amp; time</label>
+      <input type="datetime-local" id="due-date-input" required>
+    </div>
+
+    <div class="field-group">
+      <label for="destination-input">Destination</label>
+      <input type="text" id="destination-input">
+    </div>
+
+    <div class="field-group">
+      <label for="notes-input">Notes</label>
+      <textarea id="notes-input" rows="3"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label for="created-by-input">Your name</label>
+      <input type="text" id="created-by-input" required>
+    </div>
+
+    <p id="form-error" class="form-error" hidden></p>
+
+    <div class="modal-actions">
+      <button type="button" id="cancel-order-btn" class="btn btn-secondary">Cancel</button>
+      <button type="submit" id="save-order-btn" class="btn btn-primary">Save Order</button>
+    </div>
+  </form>
+</dialog>
+
+<template id="order-card-template">
+  <article class="order-card">
+    <div class="order-card-header">
+      <h3 class="order-customer"></h3>
+      <span class="status-badge"></span>
+    </div>
+    <p class="order-product"></p>
+    <p class="order-pack">
+      <span class="pack-summary"></span>
+      <span class="flag-badge" hidden title="Non-standard units per pack">&#9888; Non-standard</span>
+    </p>
+    <p class="order-due"></p>
+    <p class="order-destination"></p>
+    <p class="order-notes"></p>
+    <p class="order-meta"></p>
+    <div class="order-actions"></div>
+  </article>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-client.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
