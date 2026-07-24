@@ -19,6 +19,7 @@ const STATUS_FLOW = {
 
 let orders = [];
 let customers = [];
+let editingOrderId = null;
 
 const els = {};
 
@@ -50,6 +51,8 @@ function cacheEls() {
   els.cancelOrderBtn = document.getElementById("cancel-order-btn");
   els.formError = document.getElementById("form-error");
 
+  els.modalTitle = document.getElementById("modal-title");
+  els.saveOrderBtn = document.getElementById("save-order-btn");
   els.customerSelect = document.getElementById("customer-select");
   els.newCustomerInput = document.getElementById("new-customer-input");
   els.productSelect = document.getElementById("product-select");
@@ -73,9 +76,12 @@ function cacheEls() {
 }
 
 function bindStaticEvents() {
-  els.newOrderBtn.addEventListener("click", openNewOrderModal);
+  els.newOrderBtn.addEventListener("click", () => openOrderModal(null));
   els.cancelOrderBtn.addEventListener("click", () => els.orderModal.close());
   els.orderForm.addEventListener("submit", handleFormSubmit);
+  els.orderModal.addEventListener("close", () => {
+    editingOrderId = null;
+  });
 
   els.customerSelect.addEventListener("change", () => {
     els.newCustomerInput.hidden = els.customerSelect.value !== "__new__";
@@ -87,15 +93,24 @@ function bindStaticEvents() {
     const defaultUnits = PACK_METHOD_DEFAULTS[method];
     if (defaultUnits != null) {
       els.unitsPerPackInput.value = defaultUnits;
-      els.unitsDefaultHint.textContent = `(standard: ${defaultUnits})`;
-    } else {
-      els.unitsDefaultHint.textContent = "";
     }
+    updateUnitsHint(method);
   });
 
   els.statusFilter.addEventListener("change", renderOrders);
   els.sortOrder.addEventListener("change", renderOrders);
   els.flaggedOnly.addEventListener("change", renderOrders);
+}
+
+function updateUnitsHint(method) {
+  const defaultUnits = PACK_METHOD_DEFAULTS[method];
+  els.unitsDefaultHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+}
+
+function toDatetimeLocalValue(isoString) {
+  const d = new Date(isoString);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function populateProductOptions() {
@@ -120,11 +135,33 @@ function populateCustomerOptions() {
   }
 }
 
-function openNewOrderModal() {
+function openOrderModal(order) {
   els.orderForm.reset();
   els.newCustomerInput.hidden = true;
   els.unitsDefaultHint.textContent = "";
   els.formError.hidden = true;
+
+  if (order) {
+    editingOrderId = order.id;
+    els.modalTitle.textContent = "Edit Order";
+    els.saveOrderBtn.textContent = "Save Changes";
+
+    els.customerSelect.value = order.customer;
+    els.productSelect.value = order.product;
+    els.packMethodSelect.value = order.pack_method;
+    updateUnitsHint(order.pack_method);
+    els.unitsPerPackInput.value = order.units_per_pack;
+    els.quantityInput.value = order.quantity;
+    els.dueDateInput.value = toDatetimeLocalValue(order.due_date);
+    els.destinationInput.value = order.destination || "";
+    els.notesInput.value = order.notes || "";
+    els.createdByInput.value = order.created_by || "";
+  } else {
+    editingOrderId = null;
+    els.modalTitle.textContent = "New Order";
+    els.saveOrderBtn.textContent = "Save Order";
+  }
+
   els.orderModal.showModal();
 }
 
@@ -150,7 +187,7 @@ async function handleFormSubmit(event) {
       }
     }
 
-    const newOrder = {
+    const orderFields = {
       customer: customerName,
       product: els.productSelect.value,
       pack_method: els.packMethodSelect.value,
@@ -160,11 +197,17 @@ async function handleFormSubmit(event) {
       destination: els.destinationInput.value.trim(),
       notes: els.notesInput.value.trim(),
       created_by: els.createdByInput.value.trim(),
-      status: "OPEN",
     };
 
-    const saved = await db.createOrder(newOrder);
-    orders.push(saved);
+    if (editingOrderId) {
+      const updated = await db.updateOrder(editingOrderId, orderFields);
+      const idx = orders.findIndex((o) => o.id === editingOrderId);
+      if (idx !== -1) orders[idx] = updated;
+    } else {
+      const saved = await db.createOrder({ ...orderFields, status: "OPEN" });
+      orders.push(saved);
+    }
+
     renderOrders();
     els.orderModal.close();
   } catch (err) {
@@ -258,6 +301,13 @@ function buildOrderCard(order) {
     `Created by ${order.created_by || "unknown"} on ${new Date(order.created_at).toLocaleDateString()}`;
 
   const actions = node.querySelector(".order-actions");
+
+  const editBtn = document.createElement("button");
+  editBtn.className = "btn-status btn-edit";
+  editBtn.textContent = "Edit";
+  editBtn.addEventListener("click", () => openOrderModal(order));
+  actions.appendChild(editBtn);
+
   const nextStatus = STATUS_FLOW[order.status];
   if (nextStatus) {
     const btn = document.createElement("button");

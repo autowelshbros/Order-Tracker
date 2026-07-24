@@ -38,6 +38,17 @@ const db = {
     return data;
   },
 
+  async updateOrder(id, fields) {
+    const { data, error } = await supabaseClient
+      .from("special_orders")
+      .update(fields)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
   async updateOrderStatus(id, status) {
     const { data, error } = await supabaseClient
       .from("special_orders")
