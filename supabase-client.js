@@ -8,12 +8,32 @@ const SUPABASE_ANON_KEY = "sb_publishable_A6Zw-3R9qKDEnND8rsXq6w_ompyc_9A";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const PACK_METHOD_DEFAULTS = {
-  "Skid": 30,
-  "Rack": 21,
-  "Bin": 600,
-  "Other": null,
-};
+// Product category drives the standard units-per-container, since the same
+// pack method holds a different standard count depending on what's in it
+// (e.g. a Skid of bags vs. a Skid of boxes).
+function productCategory(product) {
+  if (/bag/i.test(product)) return "bag";
+  if (/box/i.test(product)) return "box";
+  return null;
+}
+
+// Returns the standard units-per-container for a given product + pack method,
+// or null when there's no defined standard for that combination.
+function getStandardUnitsPerPack(product, packMethod) {
+  if (packMethod === "Bin") return 600;
+
+  const category = productCategory(product);
+  if (packMethod === "Skid") {
+    if (category === "bag") return 30;
+    if (category === "box") return 40;
+    return null;
+  }
+  if (packMethod === "Rack") {
+    if (category === "bag") return 21;
+    return null;
+  }
+  return null;
+}
 
 const ORDER_STATUSES = ["OPEN", "PACKED", "SHIPPED"];
 

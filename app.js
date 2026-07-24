@@ -28,6 +28,22 @@ function unitsLabelFor(method) {
   return UNITS_LABELS[method] || "Units per pack";
 }
 
+function unitsHintText(product, packMethod) {
+  const standard = getStandardUnitsPerPack(product, packMethod);
+  return standard != null ? `(standard: ${standard})` : "";
+}
+
+function unitsNounFor(product) {
+  const category = productCategory(product);
+  if (category === "bag") return "Bags";
+  if (category === "box") return "Boxes";
+  return "Cobs";
+}
+
+function packMethodLabel(method, quantity) {
+  return quantity === 1 ? method : `${method}s`;
+}
+
 let orders = [];
 let customers = [];
 let editingOrderId = null;
@@ -184,10 +200,15 @@ function addLineRow(line) {
   const quantityInput = row.querySelector(".line-quantity");
   const removeBtn = row.querySelector(".remove-line-btn");
 
+  function applyUnitsDefault() {
+    const standard = getStandardUnitsPerPack(productSelect.value, packMethodSelect.value);
+    if (standard != null) unitsInput.value = standard;
+    unitsHint.textContent = unitsHintText(productSelect.value, packMethodSelect.value);
+  }
+
+  productSelect.addEventListener("change", applyUnitsDefault);
   packMethodSelect.addEventListener("change", () => {
-    const defaultUnits = PACK_METHOD_DEFAULTS[packMethodSelect.value];
-    if (defaultUnits != null) unitsInput.value = defaultUnits;
-    unitsHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+    applyUnitsDefault();
     unitsLabel.textContent = unitsLabelFor(packMethodSelect.value);
   });
 
@@ -199,8 +220,7 @@ function addLineRow(line) {
   if (line) {
     productSelect.value = line.product;
     packMethodSelect.value = line.pack_method;
-    const defaultUnits = PACK_METHOD_DEFAULTS[line.pack_method];
-    unitsHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+    unitsHint.textContent = unitsHintText(line.product, line.pack_method);
     unitsLabel.textContent = unitsLabelFor(line.pack_method);
     unitsInput.value = line.units_per_pack;
     quantityInput.value = line.quantity;
@@ -344,7 +364,7 @@ async function advanceStatus(order) {
 }
 
 function isLineFlagged(line) {
-  const standard = PACK_METHOD_DEFAULTS[line.pack_method];
+  const standard = getStandardUnitsPerPack(line.product, line.pack_method);
   return standard != null && Number(line.units_per_pack) !== standard;
 }
 
@@ -402,7 +422,7 @@ function buildOrderCard(order) {
   for (const line of order.lines) {
     const lineNode = els.lineDisplayTemplate.content.cloneNode(true);
     lineNode.querySelector(".line-summary").textContent =
-      `${line.quantity} x ${line.pack_method} — ${line.product} (${line.units_per_pack}/pack)`;
+      `${line.quantity} ${packMethodLabel(line.pack_method, line.quantity)} of ${line.units_per_pack} ${unitsNounFor(line.product)} — ${line.product}`;
     lineNode.querySelector(".flag-badge").hidden = !isLineFlagged(line);
     linesList.appendChild(lineNode);
   }
