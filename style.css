@@ -305,7 +305,7 @@ textarea {
   display: none;
 }
 
-.order-due, .order-destination, .order-notes, .order-meta {
+.order-due, .order-destination, .order-pickup-location, .order-notes, .order-meta {
   margin: 4px 0;
 }
 

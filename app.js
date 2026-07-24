@@ -61,6 +61,7 @@ function cacheEls() {
 
   els.dueDateInput = document.getElementById("due-date-input");
   els.destinationInput = document.getElementById("destination-input");
+  els.pickupLocationSelect = document.getElementById("pickup-location-select");
   els.notesInput = document.getElementById("notes-input");
   els.createdByInput = document.getElementById("created-by-input");
 
@@ -226,6 +227,7 @@ function openOrderModal(order) {
     els.customerSelect.value = order.customer;
     els.dueDateInput.value = toDatetimeLocalValue(order.due_date);
     els.destinationInput.value = order.destination || "";
+    els.pickupLocationSelect.value = order.pickup_location || "";
     els.notesInput.value = order.notes || "";
     els.createdByInput.value = order.created_by || "";
 
@@ -273,6 +275,7 @@ async function handleFormSubmit(event) {
       customer: customerName,
       due_date: new Date(els.dueDateInput.value).toISOString(),
       destination: els.destinationInput.value.trim(),
+      pickup_location: els.pickupLocationSelect.value || null,
       notes: els.notesInput.value.trim(),
       created_by: els.createdByInput.value.trim(),
     };
@@ -399,6 +402,13 @@ function buildOrderCard(order) {
     destEl.textContent = `To: ${order.destination}`;
   } else {
     destEl.remove();
+  }
+
+  const pickupEl = node.querySelector(".order-pickup-location");
+  if (order.pickup_location) {
+    pickupEl.textContent = `Pickup: ${order.pickup_location}`;
+  } else {
+    pickupEl.remove();
   }
 
   const notesEl = node.querySelector(".order-notes");

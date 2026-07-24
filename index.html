@@ -83,6 +83,15 @@
     </div>
 
     <div class="field-group">
+      <label for="pickup-location-select">Pickup location</label>
+      <select id="pickup-location-select">
+        <option value="" selected>Not set</option>
+        <option value="Market">Market</option>
+        <option value="Home">Home</option>
+      </select>
+    </div>
+
+    <div class="field-group">
       <label for="notes-input">Notes</label>
       <textarea id="notes-input" rows="3"></textarea>
     </div>
@@ -152,6 +161,7 @@
     <ul class="order-lines"></ul>
     <p class="order-due"></p>
     <p class="order-destination"></p>
+    <p class="order-pickup-location"></p>
     <p class="order-notes"></p>
     <p class="order-meta"></p>
     <div class="order-actions"></div>
