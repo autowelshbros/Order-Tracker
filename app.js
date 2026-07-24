@@ -67,6 +67,8 @@ function cacheEls() {
 
   els.statusFilter = document.getElementById("status-filter");
   els.sortOrder = document.getElementById("sort-order");
+  els.dayFilter = document.getElementById("day-filter");
+  els.clearDayFilterBtn = document.getElementById("clear-day-filter-btn");
   els.flaggedOnly = document.getElementById("flagged-only");
 
   els.orderList = document.getElementById("order-list");
@@ -100,6 +102,29 @@ function bindStaticEvents() {
   els.statusFilter.addEventListener("change", renderOrders);
   els.sortOrder.addEventListener("change", renderOrders);
   els.flaggedOnly.addEventListener("change", renderOrders);
+
+  els.dayFilter.addEventListener("change", () => {
+    els.clearDayFilterBtn.hidden = !els.dayFilter.value;
+    renderOrders();
+  });
+  els.clearDayFilterBtn.addEventListener("click", () => {
+    els.dayFilter.value = "";
+    els.clearDayFilterBtn.hidden = true;
+    renderOrders();
+  });
+}
+
+function localDateKey(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function dayHeadingLabel(date) {
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 function updateUnitsHint(method) {
@@ -240,9 +265,11 @@ function renderOrders() {
   const statusValue = els.statusFilter.value;
   const sortDir = els.sortOrder.value;
   const flaggedOnly = els.flaggedOnly.checked;
+  const dayValue = els.dayFilter.value;
 
   let visible = orders.filter((o) => statusValue === "ALL" || o.status === statusValue);
   if (flaggedOnly) visible = visible.filter(isFlagged);
+  if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o.due_date)) === dayValue);
 
   visible.sort((a, b) => {
     const diff = new Date(a.due_date) - new Date(b.due_date);
@@ -252,7 +279,17 @@ function renderOrders() {
   els.orderList.innerHTML = "";
   els.emptyState.hidden = visible.length !== 0;
 
+  let currentDayKey = null;
   for (const order of visible) {
+    const dueDate = new Date(order.due_date);
+    const dayKey = localDateKey(dueDate);
+    if (dayKey !== currentDayKey) {
+      currentDayKey = dayKey;
+      const heading = document.createElement("h2");
+      heading.className = "day-heading";
+      heading.textContent = dayHeadingLabel(dueDate);
+      els.orderList.appendChild(heading);
+    }
     els.orderList.appendChild(buildOrderCard(order));
   }
 }

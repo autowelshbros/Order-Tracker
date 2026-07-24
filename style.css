@@ -181,6 +181,33 @@ textarea {
   resize: vertical;
 }
 
+.day-filter-row {
+  display: flex;
+  gap: 6px;
+}
+
+.day-filter-row input[type="date"] {
+  flex: 1;
+}
+
+.day-filter-row .btn {
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.day-heading {
+  margin: 20px 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.day-heading:first-child {
+  margin-top: 0;
+}
+
 .checkbox-label {
   flex-direction: row;
   align-items: center;
