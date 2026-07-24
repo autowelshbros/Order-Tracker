@@ -67,37 +67,9 @@
     </div>
 
     <div class="field-group">
-      <label for="product-select">Product</label>
-      <select id="product-select" required>
-        <option value="" disabled selected>Select product&hellip;</option>
-      </select>
-    </div>
-
-    <div class="field-group">
-      <label for="pack-method-select">Pack method</label>
-      <select id="pack-method-select" required>
-        <option value="" disabled selected>Select pack method&hellip;</option>
-        <option value="Skid">Skid</option>
-        <option value="Box">Box</option>
-        <option value="Rack">Rack</option>
-        <option value="Bin">Bin</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-
-    <div class="field-row">
-      <div class="field-group">
-        <label for="units-per-pack-input">
-          Units per pack
-          <span id="units-default-hint" class="hint"></span>
-        </label>
-        <input type="number" id="units-per-pack-input" min="0" required>
-      </div>
-
-      <div class="field-group">
-        <label for="quantity-input">Quantity</label>
-        <input type="number" id="quantity-input" min="1" required>
-      </div>
+      <label>Product lines</label>
+      <div id="order-lines-container"></div>
+      <button type="button" id="add-line-btn" class="btn btn-secondary">+ Add product line</button>
     </div>
 
     <div class="field-group">
@@ -129,23 +101,68 @@
   </form>
 </dialog>
 
+<template id="order-line-template">
+  <div class="order-line">
+    <div class="line-fields">
+      <div class="field-group">
+        <label>Product</label>
+        <select class="line-product" required>
+          <option value="" disabled selected>Select product&hellip;</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Pack method</label>
+        <select class="line-pack-method" required>
+          <option value="" disabled selected>Select pack method&hellip;</option>
+          <option value="Skid">Skid</option>
+          <option value="Box">Box</option>
+          <option value="Rack">Rack</option>
+          <option value="Bin">Bin</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>
+            Units per pack
+            <span class="line-units-hint hint"></span>
+          </label>
+          <input type="number" class="line-units" min="0" required>
+        </div>
+
+        <div class="field-group">
+          <label>Quantity</label>
+          <input type="number" class="line-quantity" min="1" required>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-secondary remove-line-btn">Remove line</button>
+  </div>
+</template>
+
 <template id="order-card-template">
   <article class="order-card">
     <div class="order-card-header">
       <h3 class="order-customer"></h3>
       <span class="status-badge"></span>
     </div>
-    <p class="order-product"></p>
-    <p class="order-pack">
-      <span class="pack-summary"></span>
-      <span class="flag-badge" hidden title="Non-standard units per pack">&#9888; Non-standard</span>
-    </p>
+    <ul class="order-lines"></ul>
     <p class="order-due"></p>
     <p class="order-destination"></p>
     <p class="order-notes"></p>
     <p class="order-meta"></p>
     <div class="order-actions"></div>
   </article>
+</template>
+
+<template id="order-line-display-template">
+  <li class="order-line-display">
+    <span class="line-summary"></span>
+    <span class="flag-badge" hidden title="Non-standard units per pack">&#9888; Non-standard</span>
+  </li>
 </template>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

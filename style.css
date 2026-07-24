@@ -262,17 +262,21 @@ textarea {
   font-size: 1.05rem;
 }
 
-.order-product {
-  margin: 4px 0;
-  color: var(--color-text-muted);
+.order-lines {
+  list-style: none;
+  margin: 6px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.order-pack {
-  margin: 4px 0;
+.order-line-display {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  color: var(--color-text-muted);
 }
 
 .flag-badge {
@@ -392,6 +396,36 @@ textarea {
   color: var(--color-danger);
   font-weight: 600;
   margin: 0;
+}
+
+#order-lines-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-line {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+}
+
+.order-line .line-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-line .remove-line-btn {
+  align-self: flex-end;
+}
+
+#add-line-btn {
+  align-self: flex-start;
 }
 
 .modal-actions {

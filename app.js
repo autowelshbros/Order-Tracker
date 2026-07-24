@@ -28,7 +28,6 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   cacheEls();
   bindStaticEvents();
-  populateProductOptions();
 
   try {
     [customers, orders] = await Promise.all([db.getCustomers(), db.getOrders()]);
@@ -55,11 +54,11 @@ function cacheEls() {
   els.saveOrderBtn = document.getElementById("save-order-btn");
   els.customerSelect = document.getElementById("customer-select");
   els.newCustomerInput = document.getElementById("new-customer-input");
-  els.productSelect = document.getElementById("product-select");
-  els.packMethodSelect = document.getElementById("pack-method-select");
-  els.unitsPerPackInput = document.getElementById("units-per-pack-input");
-  els.unitsDefaultHint = document.getElementById("units-default-hint");
-  els.quantityInput = document.getElementById("quantity-input");
+
+  els.linesContainer = document.getElementById("order-lines-container");
+  els.addLineBtn = document.getElementById("add-line-btn");
+  els.lineTemplate = document.getElementById("order-line-template");
+
   els.dueDateInput = document.getElementById("due-date-input");
   els.destinationInput = document.getElementById("destination-input");
   els.notesInput = document.getElementById("notes-input");
@@ -75,6 +74,7 @@ function cacheEls() {
   els.emptyState = document.getElementById("empty-state");
   els.loadingState = document.getElementById("loading-state");
   els.cardTemplate = document.getElementById("order-card-template");
+  els.lineDisplayTemplate = document.getElementById("order-line-display-template");
 }
 
 function bindStaticEvents() {
@@ -90,14 +90,7 @@ function bindStaticEvents() {
     if (!els.newCustomerInput.hidden) els.newCustomerInput.focus();
   });
 
-  els.packMethodSelect.addEventListener("change", () => {
-    const method = els.packMethodSelect.value;
-    const defaultUnits = PACK_METHOD_DEFAULTS[method];
-    if (defaultUnits != null) {
-      els.unitsPerPackInput.value = defaultUnits;
-    }
-    updateUnitsHint(method);
-  });
+  els.addLineBtn.addEventListener("click", () => addLineRow());
 
   els.statusFilter.addEventListener("change", renderOrders);
   els.sortOrder.addEventListener("change", renderOrders);
@@ -127,24 +120,21 @@ function dayHeadingLabel(date) {
   });
 }
 
-function updateUnitsHint(method) {
-  const defaultUnits = PACK_METHOD_DEFAULTS[method];
-  els.unitsDefaultHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+function fullDueDateLabel(date) {
+  return date.toLocaleString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function toDatetimeLocalValue(isoString) {
   const d = new Date(isoString);
   const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function populateProductOptions() {
-  for (const product of PRODUCTS) {
-    const opt = document.createElement("option");
-    opt.value = product;
-    opt.textContent = product;
-    els.productSelect.appendChild(opt);
-  }
 }
 
 function populateCustomerOptions() {
@@ -160,11 +150,73 @@ function populateCustomerOptions() {
   }
 }
 
+// --- Order line rows within the New/Edit Order form ---
+
+function addLineRow(line) {
+  const node = els.lineTemplate.content.cloneNode(true);
+  const row = node.querySelector(".order-line");
+
+  const productSelect = row.querySelector(".line-product");
+  for (const product of PRODUCTS) {
+    const opt = document.createElement("option");
+    opt.value = product;
+    opt.textContent = product;
+    productSelect.appendChild(opt);
+  }
+
+  const packMethodSelect = row.querySelector(".line-pack-method");
+  const unitsInput = row.querySelector(".line-units");
+  const unitsHint = row.querySelector(".line-units-hint");
+  const quantityInput = row.querySelector(".line-quantity");
+  const removeBtn = row.querySelector(".remove-line-btn");
+
+  packMethodSelect.addEventListener("change", () => {
+    const defaultUnits = PACK_METHOD_DEFAULTS[packMethodSelect.value];
+    if (defaultUnits != null) unitsInput.value = defaultUnits;
+    unitsHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+  });
+
+  removeBtn.addEventListener("click", () => {
+    row.remove();
+    updateRemoveLineButtons();
+  });
+
+  if (line) {
+    productSelect.value = line.product;
+    packMethodSelect.value = line.pack_method;
+    const defaultUnits = PACK_METHOD_DEFAULTS[line.pack_method];
+    unitsHint.textContent = defaultUnits != null ? `(standard: ${defaultUnits})` : "";
+    unitsInput.value = line.units_per_pack;
+    quantityInput.value = line.quantity;
+  }
+
+  els.linesContainer.appendChild(row);
+  updateRemoveLineButtons();
+}
+
+function updateRemoveLineButtons() {
+  const rows = els.linesContainer.querySelectorAll(".order-line");
+  rows.forEach((row) => {
+    row.querySelector(".remove-line-btn").hidden = rows.length <= 1;
+  });
+}
+
+function readLinesFromForm() {
+  return Array.from(els.linesContainer.querySelectorAll(".order-line")).map((row) => ({
+    product: row.querySelector(".line-product").value,
+    pack_method: row.querySelector(".line-pack-method").value,
+    units_per_pack: Number(row.querySelector(".line-units").value),
+    quantity: Number(row.querySelector(".line-quantity").value),
+  }));
+}
+
+// --- New/Edit Order modal ---
+
 function openOrderModal(order) {
   els.orderForm.reset();
   els.newCustomerInput.hidden = true;
-  els.unitsDefaultHint.textContent = "";
   els.formError.hidden = true;
+  els.linesContainer.innerHTML = "";
 
   if (order) {
     editingOrderId = order.id;
@@ -172,19 +224,19 @@ function openOrderModal(order) {
     els.saveOrderBtn.textContent = "Save Changes";
 
     els.customerSelect.value = order.customer;
-    els.productSelect.value = order.product;
-    els.packMethodSelect.value = order.pack_method;
-    updateUnitsHint(order.pack_method);
-    els.unitsPerPackInput.value = order.units_per_pack;
-    els.quantityInput.value = order.quantity;
     els.dueDateInput.value = toDatetimeLocalValue(order.due_date);
     els.destinationInput.value = order.destination || "";
     els.notesInput.value = order.notes || "";
     els.createdByInput.value = order.created_by || "";
+
+    for (const line of order.lines) {
+      addLineRow(line);
+    }
   } else {
     editingOrderId = null;
     els.modalTitle.textContent = "New Order";
     els.saveOrderBtn.textContent = "Save Order";
+    addLineRow();
   }
 
   els.orderModal.showModal();
@@ -212,12 +264,13 @@ async function handleFormSubmit(event) {
       }
     }
 
-    const orderFields = {
+    const lines = readLinesFromForm();
+    if (lines.length === 0) {
+      throw new Error("Add at least one product line.");
+    }
+
+    const headerFields = {
       customer: customerName,
-      product: els.productSelect.value,
-      pack_method: els.packMethodSelect.value,
-      units_per_pack: Number(els.unitsPerPackInput.value),
-      quantity: Number(els.quantityInput.value),
       due_date: new Date(els.dueDateInput.value).toISOString(),
       destination: els.destinationInput.value.trim(),
       notes: els.notesInput.value.trim(),
@@ -225,11 +278,11 @@ async function handleFormSubmit(event) {
     };
 
     if (editingOrderId) {
-      const updated = await db.updateOrder(editingOrderId, orderFields);
+      const updated = await db.updateOrder(editingOrderId, headerFields, lines);
       const idx = orders.findIndex((o) => o.id === editingOrderId);
       if (idx !== -1) orders[idx] = updated;
     } else {
-      const saved = await db.createOrder({ ...orderFields, status: "OPEN" });
+      const saved = await db.createOrder({ ...headerFields, status: "OPEN" }, lines);
       orders.push(saved);
     }
 
@@ -248,7 +301,7 @@ async function advanceStatus(order) {
   try {
     const updated = await db.updateOrderStatus(order.id, nextStatus);
     const idx = orders.findIndex((o) => o.id === order.id);
-    if (idx !== -1) orders[idx] = updated;
+    if (idx !== -1) orders[idx] = { ...orders[idx], ...updated };
     renderOrders();
   } catch (err) {
     console.error(err);
@@ -256,9 +309,13 @@ async function advanceStatus(order) {
   }
 }
 
-function isFlagged(order) {
-  const standard = PACK_METHOD_DEFAULTS[order.pack_method];
-  return standard != null && Number(order.units_per_pack) !== standard;
+function isLineFlagged(line) {
+  const standard = PACK_METHOD_DEFAULTS[line.pack_method];
+  return standard != null && Number(line.units_per_pack) !== standard;
+}
+
+function orderHasFlaggedLine(order) {
+  return (order.lines || []).some(isLineFlagged);
 }
 
 function renderOrders() {
@@ -268,7 +325,7 @@ function renderOrders() {
   const dayValue = els.dayFilter.value;
 
   let visible = orders.filter((o) => statusValue === "ALL" || o.status === statusValue);
-  if (flaggedOnly) visible = visible.filter(isFlagged);
+  if (flaggedOnly) visible = visible.filter(orderHasFlaggedLine);
   if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o.due_date)) === dayValue);
 
   visible.sort((a, b) => {
@@ -297,7 +354,7 @@ function renderOrders() {
 function buildOrderCard(order) {
   const node = els.cardTemplate.content.cloneNode(true);
   const card = node.querySelector(".order-card");
-  const flagged = isFlagged(order);
+  const flagged = orderHasFlaggedLine(order);
 
   card.classList.toggle("flagged", flagged);
 
@@ -307,15 +364,18 @@ function buildOrderCard(order) {
   badge.textContent = order.status;
   badge.classList.add(`status-${order.status.toLowerCase()}`);
 
-  node.querySelector(".order-product").textContent = order.product;
-
-  node.querySelector(".pack-summary").textContent =
-    `${order.quantity} x ${order.pack_method} (${order.units_per_pack}/pack)`;
-  node.querySelector(".flag-badge").hidden = !flagged;
+  const linesList = node.querySelector(".order-lines");
+  for (const line of order.lines) {
+    const lineNode = els.lineDisplayTemplate.content.cloneNode(true);
+    lineNode.querySelector(".line-summary").textContent =
+      `${line.quantity} x ${line.pack_method} — ${line.product} (${line.units_per_pack}/pack)`;
+    lineNode.querySelector(".flag-badge").hidden = !isLineFlagged(line);
+    linesList.appendChild(lineNode);
+  }
 
   const dueEl = node.querySelector(".order-due");
   const dueDate = new Date(order.due_date);
-  dueEl.textContent = `Due: ${dueDate.toLocaleString()}`;
+  dueEl.textContent = `Due: ${fullDueDateLabel(dueDate)}`;
   if (order.status !== "SHIPPED" && dueDate.getTime() < Date.now()) {
     dueEl.classList.add("overdue");
   }
@@ -361,6 +421,14 @@ function subscribeToRealtime() {
   supabaseClient
     .channel("special_orders_changes")
     .on("postgres_changes", { event: "*", schema: "public", table: "special_orders" }, async () => {
+      try {
+        orders = await db.getOrders();
+        renderOrders();
+      } catch (err) {
+        console.error(err);
+      }
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "special_order_lines" }, async () => {
       try {
         orders = await db.getOrders();
         renderOrders();

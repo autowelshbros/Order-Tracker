@@ -22,31 +22,52 @@ const db = {
   async getOrders() {
     const { data, error } = await supabaseClient
       .from("special_orders")
-      .select("*")
-      .order("due_date", { ascending: true });
+      .select("*, lines:special_order_lines(*)")
+      .order("due_date", { ascending: true })
+      .order("id", { foreignTable: "special_order_lines", ascending: true });
     if (error) throw error;
     return data;
   },
 
-  async createOrder(order) {
-    const { data, error } = await supabaseClient
+  async createOrder(headerFields, lines) {
+    const { data: order, error: orderError } = await supabaseClient
       .from("special_orders")
-      .insert(order)
+      .insert(headerFields)
       .select()
       .single();
-    if (error) throw error;
-    return data;
+    if (orderError) throw orderError;
+
+    const { data: insertedLines, error: linesError } = await supabaseClient
+      .from("special_order_lines")
+      .insert(lines.map((line) => ({ ...line, order_id: order.id })))
+      .select();
+    if (linesError) throw linesError;
+
+    return { ...order, lines: insertedLines };
   },
 
-  async updateOrder(id, fields) {
-    const { data, error } = await supabaseClient
+  async updateOrder(id, headerFields, lines) {
+    const { data: order, error: orderError } = await supabaseClient
       .from("special_orders")
-      .update(fields)
+      .update(headerFields)
       .eq("id", id)
       .select()
       .single();
-    if (error) throw error;
-    return data;
+    if (orderError) throw orderError;
+
+    const { error: deleteError } = await supabaseClient
+      .from("special_order_lines")
+      .delete()
+      .eq("order_id", id);
+    if (deleteError) throw deleteError;
+
+    const { data: insertedLines, error: linesError } = await supabaseClient
+      .from("special_order_lines")
+      .insert(lines.map((line) => ({ ...line, order_id: id })))
+      .select();
+    if (linesError) throw linesError;
+
+    return { ...order, lines: insertedLines };
   },
 
   async updateOrderStatus(id, status) {
