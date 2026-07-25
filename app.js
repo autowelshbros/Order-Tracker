@@ -106,6 +106,7 @@ function cacheEls() {
   els.shipDateInput = document.getElementById("ship-date-input");
   els.packByDateInput = document.getElementById("pack-by-date-input");
   els.destinationInput = document.getElementById("destination-input");
+  els.poNumberInput = document.getElementById("po-number-input");
   els.pickupLocationSelect = document.getElementById("pickup-location-select");
   els.notesInput = document.getElementById("notes-input");
   els.createdByInput = document.getElementById("created-by-input");
@@ -283,6 +284,7 @@ function openOrderModal(order) {
     els.shipDateInput.value = toDatetimeLocalValue(order.ship_date);
     els.packByDateInput.value = order.pack_by_date ? toDatetimeLocalValue(order.pack_by_date) : "";
     els.destinationInput.value = order.destination || "";
+    els.poNumberInput.value = order.po_number || "";
     els.pickupLocationSelect.value = order.pickup_location || "";
     els.notesInput.value = order.notes || "";
     els.createdByInput.value = order.created_by || "";
@@ -332,6 +334,7 @@ async function handleFormSubmit(event) {
       ship_date: new Date(els.shipDateInput.value).toISOString(),
       pack_by_date: new Date(els.packByDateInput.value).toISOString(),
       destination: els.destinationInput.value.trim(),
+      po_number: els.poNumberInput.value.trim(),
       pickup_location: els.pickupLocationSelect.value || null,
       notes: els.notesInput.value.trim(),
       created_by: els.createdByInput.value.trim(),
@@ -474,6 +477,13 @@ function buildOrderCard(order) {
     destEl.textContent = `To: ${order.destination}`;
   } else {
     destEl.remove();
+  }
+
+  const poEl = node.querySelector(".order-po-number");
+  if (order.po_number) {
+    poEl.textContent = `PO: ${order.po_number}`;
+  } else {
+    poEl.remove();
   }
 
   const pickupEl = node.querySelector(".order-pickup-location");

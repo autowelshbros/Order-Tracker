@@ -7,13 +7,13 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Order Tracker</title>
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
 <header class="app-header">
   <h1>Order Tracker</h1>
-  <span id="build-version" class="build-version">Build: v1.5</span>
+  <span id="build-version" class="build-version">Build: v1.6</span>
   <button id="check-updates-btn" class="btn btn-secondary btn-check-updates" type="button">&#8635; Check for updates</button>
   <button id="new-order-btn" class="btn btn-primary">+ New Order</button>
 </header>
@@ -102,6 +102,11 @@
     </div>
 
     <div class="field-group">
+      <label for="po-number-input">PO number</label>
+      <input type="text" id="po-number-input">
+    </div>
+
+    <div class="field-group">
       <label for="pickup-location-select">Pickup location</label>
       <select id="pickup-location-select">
         <option value="" selected>Not set</option>
@@ -180,6 +185,7 @@
     <p class="order-ship-date"></p>
     <p class="order-pack-by-date"></p>
     <p class="order-destination"></p>
+    <p class="order-po-number"></p>
     <p class="order-pickup-location"></p>
     <p class="order-notes"></p>
     <p class="order-meta"></p>
@@ -195,7 +201,7 @@
 </template>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase-client.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="supabase-client.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
