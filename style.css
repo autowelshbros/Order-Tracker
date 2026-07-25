@@ -61,6 +61,15 @@ button, input, select, textarea {
   font-size: 1.25rem;
 }
 
+.build-version {
+  margin-right: auto;
+  margin-left: -4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+}
+
 /* Buttons */
 
 .btn {
