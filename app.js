@@ -44,6 +44,22 @@ function packMethodLabel(method, quantity) {
   return quantity === 1 ? method : `${method}s`;
 }
 
+async function forceReloadBypassCache() {
+  if (window.caches && caches.keys) {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    } catch (err) {
+      // Cache Storage API unavailable or blocked; fall through to URL-based bust.
+    }
+  }
+
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.searchParams.set("_cb", Date.now().toString());
+  window.location.replace(url.toString());
+}
+
 let orders = [];
 let customers = [];
 let editingOrderId = null;
@@ -72,6 +88,7 @@ async function init() {
 
 function cacheEls() {
   els.newOrderBtn = document.getElementById("new-order-btn");
+  els.checkUpdatesBtn = document.getElementById("check-updates-btn");
   els.orderModal = document.getElementById("order-modal");
   els.orderForm = document.getElementById("order-form");
   els.cancelOrderBtn = document.getElementById("cancel-order-btn");
@@ -108,6 +125,7 @@ function cacheEls() {
 
 function bindStaticEvents() {
   els.newOrderBtn.addEventListener("click", () => openOrderModal(null));
+  els.checkUpdatesBtn.addEventListener("click", forceReloadBypassCache);
   els.cancelOrderBtn.addEventListener("click", () => els.orderModal.close());
   els.orderForm.addEventListener("submit", handleFormSubmit);
   els.orderModal.addEventListener("close", () => {

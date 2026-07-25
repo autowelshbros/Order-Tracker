@@ -70,6 +70,12 @@ button, input, select, textarea {
   white-space: nowrap;
 }
 
+.btn-check-updates {
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
 /* Buttons */
 
 .btn {
@@ -461,8 +467,19 @@ textarea {
 /* Small screens / handheld scanners (Zebra TC21 ~ 720px wide) */
 
 @media (max-width: 480px) {
+  .app-header {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
   .app-header h1 {
     font-size: 1.1rem;
+  }
+
+  .build-version {
+    margin-left: 0;
+    order: 3;
+    flex: 1 1 100%;
   }
 
   .toolbar {
