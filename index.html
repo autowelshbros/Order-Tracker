@@ -7,13 +7,13 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Order Tracker</title>
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
 <header class="app-header">
   <h1>Order Tracker</h1>
-  <span id="build-version" class="build-version">Build: v1.3</span>
+  <span id="build-version" class="build-version">Build: v1.4</span>
   <button id="check-updates-btn" class="btn btn-secondary btn-check-updates" type="button">&#8635; Check for updates</button>
   <button id="new-order-btn" class="btn btn-primary">+ New Order</button>
 </header>
@@ -31,7 +31,15 @@
   </div>
 
   <div class="field-group">
-    <label for="sort-order">Due date</label>
+    <label for="date-field-select">Group by</label>
+    <select id="date-field-select">
+      <option value="pack_by_date" selected>Pack date</option>
+      <option value="ship_date">Ship date</option>
+    </select>
+  </div>
+
+  <div class="field-group">
+    <label for="sort-order">Sort</label>
     <select id="sort-order">
       <option value="asc">Soonest first</option>
       <option value="desc">Latest first</option>
@@ -187,7 +195,7 @@
 </template>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase-client.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="supabase-client.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

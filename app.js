@@ -111,6 +111,7 @@ function cacheEls() {
   els.createdByInput = document.getElementById("created-by-input");
 
   els.statusFilter = document.getElementById("status-filter");
+  els.dateFieldSelect = document.getElementById("date-field-select");
   els.sortOrder = document.getElementById("sort-order");
   els.dayFilter = document.getElementById("day-filter");
   els.clearDayFilterBtn = document.getElementById("clear-day-filter-btn");
@@ -140,6 +141,7 @@ function bindStaticEvents() {
   els.addLineBtn.addEventListener("click", () => addLineRow());
 
   els.statusFilter.addEventListener("change", renderOrders);
+  els.dateFieldSelect.addEventListener("change", renderOrders);
   els.sortOrder.addEventListener("change", renderOrders);
   els.flaggedOnly.addEventListener("change", renderOrders);
 
@@ -392,6 +394,7 @@ function orderHasFlaggedLine(order) {
 
 function renderOrders() {
   const statusValue = els.statusFilter.value;
+  const dateField = els.dateFieldSelect.value;
   const sortDir = els.sortOrder.value;
   const flaggedOnly = els.flaggedOnly.checked;
   const dayValue = els.dayFilter.value;
@@ -402,10 +405,10 @@ function renderOrders() {
     return o.status === statusValue;
   });
   if (flaggedOnly) visible = visible.filter(orderHasFlaggedLine);
-  if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o.ship_date)) === dayValue);
+  if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o[dateField])) === dayValue);
 
   visible.sort((a, b) => {
-    const diff = new Date(a.ship_date) - new Date(b.ship_date);
+    const diff = new Date(a[dateField]) - new Date(b[dateField]);
     return sortDir === "asc" ? diff : -diff;
   });
 
@@ -414,13 +417,13 @@ function renderOrders() {
 
   let currentDayKey = null;
   for (const order of visible) {
-    const shipDate = new Date(order.ship_date);
-    const dayKey = localDateKey(shipDate);
+    const groupDate = new Date(order[dateField]);
+    const dayKey = localDateKey(groupDate);
     if (dayKey !== currentDayKey) {
       currentDayKey = dayKey;
       const heading = document.createElement("h2");
       heading.className = "day-heading";
-      heading.textContent = dayHeadingLabel(shipDate);
+      heading.textContent = dayHeadingLabel(groupDate);
       els.orderList.appendChild(heading);
     }
     els.orderList.appendChild(buildOrderCard(order));
