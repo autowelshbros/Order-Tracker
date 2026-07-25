@@ -396,7 +396,11 @@ function renderOrders() {
   const flaggedOnly = els.flaggedOnly.checked;
   const dayValue = els.dayFilter.value;
 
-  let visible = orders.filter((o) => statusValue === "ALL" || o.status === statusValue);
+  let visible = orders.filter((o) => {
+    if (statusValue === "ALL") return true;
+    if (statusValue === "ACTIVE") return o.status === "OPEN" || o.status === "PACKED";
+    return o.status === statusValue;
+  });
   if (flaggedOnly) visible = visible.filter(orderHasFlaggedLine);
   if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o.ship_date)) === dayValue);
 
