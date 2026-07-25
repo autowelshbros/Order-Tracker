@@ -18,6 +18,14 @@
   --status-shipped-bg: #d9f2e3;
   --status-shipped-text: #1e6b3c;
 
+  --card-open-bg: #e1f3e3;
+  --card-open-border: #a3d8ab;
+  --card-packed-bg: #fff3cd;
+  --card-packed-border: #e0a800;
+  --card-shipped-bg: #e6e8eb;
+  --card-shipped-border: #c3c7cc;
+  --color-text-muted-oncard: #3f4750;
+
   --radius: 10px;
   --tap-min: 44px;
 }
@@ -270,9 +278,31 @@ textarea {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.order-card.flagged {
-  border-color: var(--color-warning-border);
-  background: var(--color-warning-bg);
+.order-card.status-open {
+  background: var(--card-open-bg);
+  border-color: var(--card-open-border);
+}
+
+.order-card.status-packed {
+  background: var(--card-packed-bg);
+  border-color: var(--card-packed-border);
+}
+
+.order-card.status-shipped {
+  background: var(--card-shipped-bg);
+  border-color: var(--card-shipped-border);
+}
+
+.order-card.status-open .order-line-display,
+.order-card.status-open .order-notes,
+.order-card.status-open .order-meta,
+.order-card.status-packed .order-line-display,
+.order-card.status-packed .order-notes,
+.order-card.status-packed .order-meta,
+.order-card.status-shipped .order-line-display,
+.order-card.status-shipped .order-notes,
+.order-card.status-shipped .order-meta {
+  color: var(--color-text-muted-oncard);
 }
 
 .order-card-header {

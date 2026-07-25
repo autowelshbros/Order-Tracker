@@ -433,9 +433,8 @@ function renderOrders() {
 function buildOrderCard(order) {
   const node = els.cardTemplate.content.cloneNode(true);
   const card = node.querySelector(".order-card");
-  const flagged = orderHasFlaggedLine(order);
 
-  card.classList.toggle("flagged", flagged);
+  card.classList.add(`status-${order.status.toLowerCase()}`);
 
   node.querySelector(".order-customer").textContent = order.customer;
 
