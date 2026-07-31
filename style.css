@@ -296,12 +296,15 @@ textarea {
 .order-card.status-open .order-line-display,
 .order-card.status-open .order-notes,
 .order-card.status-open .order-meta,
+.order-card.status-open .status-history-meta,
 .order-card.status-packed .order-line-display,
 .order-card.status-packed .order-notes,
 .order-card.status-packed .order-meta,
+.order-card.status-packed .status-history-meta,
 .order-card.status-shipped .order-line-display,
 .order-card.status-shipped .order-notes,
-.order-card.status-shipped .order-meta {
+.order-card.status-shipped .order-meta,
+.order-card.status-shipped .status-history-meta {
   color: var(--color-text-muted-oncard);
 }
 
@@ -377,6 +380,47 @@ textarea {
   gap: 8px;
   margin-top: 10px;
   flex-wrap: wrap;
+}
+
+/* Status history */
+
+.status-history {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.status-history-heading {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.status-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-history-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+}
+
+.status-history-change {
+  font-weight: 600;
+}
+
+.status-history-meta {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
 }
 
 /* Status badge */

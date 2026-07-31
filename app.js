@@ -63,6 +63,7 @@ async function forceReloadBypassCache() {
 let orders = [];
 let customers = [];
 let editingOrderId = null;
+let editingStatusOrderId = null;
 let packTodayOnly = false;
 
 const els = {};
@@ -126,6 +127,14 @@ function cacheEls() {
   els.loadingState = document.getElementById("loading-state");
   els.cardTemplate = document.getElementById("order-card-template");
   els.lineDisplayTemplate = document.getElementById("order-line-display-template");
+  els.statusHistoryItemTemplate = document.getElementById("status-history-item-template");
+
+  els.statusModal = document.getElementById("status-modal");
+  els.statusForm = document.getElementById("status-form");
+  els.statusSelect = document.getElementById("status-select");
+  els.statusChangedByInput = document.getElementById("status-changed-by-input");
+  els.statusFormError = document.getElementById("status-form-error");
+  els.cancelStatusBtn = document.getElementById("cancel-status-btn");
 }
 
 function bindStaticEvents() {
@@ -157,6 +166,12 @@ function bindStaticEvents() {
     els.dayFilter.value = "";
     els.clearDayFilterBtn.hidden = true;
     renderOrders();
+  });
+
+  els.cancelStatusBtn.addEventListener("click", () => els.statusModal.close());
+  els.statusForm.addEventListener("submit", handleStatusFormSubmit);
+  els.statusModal.addEventListener("close", () => {
+    editingStatusOrderId = null;
   });
 
   els.packTodayBtn.addEventListener("click", () => {
@@ -395,18 +410,56 @@ async function deleteOrder(order) {
   }
 }
 
-async function advanceStatus(order) {
-  const nextStatus = STATUS_FLOW[order.status];
-  if (!nextStatus) return;
+function openStatusModal(order, presetStatus) {
+  editingStatusOrderId = order.id;
+  els.statusFormError.hidden = true;
+  els.statusSelect.value = presetStatus || order.status;
+  els.statusChangedByInput.value = "";
+  els.statusModal.showModal();
+}
+
+async function handleStatusFormSubmit(event) {
+  event.preventDefault();
+  els.statusFormError.hidden = true;
+
+  const order = orders.find((o) => o.id === editingStatusOrderId);
+  if (!order) {
+    els.statusModal.close();
+    return;
+  }
+
+  const newStatus = els.statusSelect.value;
+  const changedBy = els.statusChangedByInput.value.trim();
+
+  if (!changedBy) {
+    els.statusFormError.textContent = "Enter your name.";
+    els.statusFormError.hidden = false;
+    return;
+  }
+  if (newStatus === order.status) {
+    els.statusFormError.textContent = "Pick a different status than the current one.";
+    els.statusFormError.hidden = false;
+    return;
+  }
+
   try {
-    const updated = await db.updateOrderStatus(order.id, nextStatus);
-    const idx = orders.findIndex((o) => o.id === order.id);
-    if (idx !== -1) orders[idx] = { ...orders[idx], ...updated };
-    renderOrders();
+    await applyStatusChange(order, newStatus, changedBy);
+    els.statusModal.close();
   } catch (err) {
     console.error(err);
-    alert("Failed to update status. Try again.");
+    els.statusFormError.textContent = err.message || "Failed to update status.";
+    els.statusFormError.hidden = false;
   }
+}
+
+async function applyStatusChange(order, newStatus, changedBy) {
+  const { order: updated, logEntry } = await db.changeOrderStatus(order.id, order.status, newStatus, changedBy);
+  const idx = orders.findIndex((o) => o.id === order.id);
+  if (idx !== -1) {
+    const prevLog = orders[idx].status_log || [];
+    orders[idx] = { ...orders[idx], ...updated, status_log: [logEntry, ...prevLog] };
+  }
+  renderOrders();
 }
 
 function isLineFlagged(line) {
@@ -531,6 +584,22 @@ function buildOrderCard(order) {
   node.querySelector(".order-meta").textContent =
     `Created by ${order.created_by || "unknown"} on ${new Date(order.created_at).toLocaleDateString()}`;
 
+  const statusHistory = node.querySelector(".status-history");
+  const statusLog = order.status_log || [];
+  if (statusLog.length > 0) {
+    const historyList = statusHistory.querySelector(".status-history-list");
+    for (const entry of statusLog) {
+      const itemNode = els.statusHistoryItemTemplate.content.cloneNode(true);
+      itemNode.querySelector(".status-history-change").textContent =
+        `${entry.old_status || "—"} → ${entry.new_status}`;
+      itemNode.querySelector(".status-history-meta").textContent =
+        `${entry.changed_by} · ${fullDateTimeLabel(new Date(entry.changed_at))}`;
+      historyList.appendChild(itemNode);
+    }
+  } else {
+    statusHistory.remove();
+  }
+
   const actions = node.querySelector(".order-actions");
 
   const editBtn = document.createElement("button");
@@ -544,9 +613,15 @@ function buildOrderCard(order) {
     const btn = document.createElement("button");
     btn.className = "btn-status";
     btn.textContent = `Mark ${nextStatus}`;
-    btn.addEventListener("click", () => advanceStatus(order));
+    btn.addEventListener("click", () => openStatusModal(order, nextStatus));
     actions.appendChild(btn);
   }
+
+  const editStatusBtn = document.createElement("button");
+  editStatusBtn.className = "btn-status btn-edit";
+  editStatusBtn.textContent = "Edit Status";
+  editStatusBtn.addEventListener("click", () => openStatusModal(order));
+  actions.appendChild(editStatusBtn);
 
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "btn-status btn-delete";
@@ -569,6 +644,14 @@ function subscribeToRealtime() {
       }
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "special_order_lines" }, async () => {
+      try {
+        orders = await db.getOrders();
+        renderOrders();
+      } catch (err) {
+        console.error(err);
+      }
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "order_status_log" }, async () => {
       try {
         orders = await db.getOrders();
         renderOrders();

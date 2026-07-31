@@ -7,13 +7,13 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Order Tracker</title>
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
 <header class="app-header">
   <h1>Order Tracker</h1>
-  <span id="build-version" class="build-version">Build: v1.8</span>
+  <span id="build-version" class="build-version">Build: v1.9</span>
   <button id="check-updates-btn" class="btn btn-secondary btn-check-updates" type="button">&#8635; Check for updates</button>
   <button id="new-order-btn" class="btn btn-primary">+ New Order</button>
 </header>
@@ -142,6 +142,33 @@
   </form>
 </dialog>
 
+<dialog id="status-modal" class="order-modal">
+  <form id="status-form" method="dialog">
+    <h2>Change Status</h2>
+
+    <div class="field-group">
+      <label for="status-select">New status</label>
+      <select id="status-select" required>
+        <option value="OPEN">Open</option>
+        <option value="PACKED">Packed</option>
+        <option value="SHIPPED">Shipped</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label for="status-changed-by-input">Your name</label>
+      <input type="text" id="status-changed-by-input" required>
+    </div>
+
+    <p id="status-form-error" class="form-error" hidden></p>
+
+    <div class="modal-actions">
+      <button type="button" id="cancel-status-btn" class="btn btn-secondary">Cancel</button>
+      <button type="submit" id="save-status-btn" class="btn btn-primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
 <template id="order-line-template">
   <div class="order-line">
     <div class="line-fields">
@@ -197,8 +224,19 @@
     <p class="order-pickup-location"></p>
     <p class="order-notes"></p>
     <p class="order-meta"></p>
+    <div class="status-history">
+      <h4 class="status-history-heading">Status history</h4>
+      <ul class="status-history-list"></ul>
+    </div>
     <div class="order-actions"></div>
   </article>
+</template>
+
+<template id="status-history-item-template">
+  <li class="status-history-item">
+    <span class="status-history-change"></span>
+    <span class="status-history-meta"></span>
+  </li>
 </template>
 
 <template id="order-line-display-template">
@@ -209,7 +247,7 @@
 </template>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase-client.js?v=7"></script>
-<script src="app.js?v=8"></script>
+<script src="supabase-client.js?v=9"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

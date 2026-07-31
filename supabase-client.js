@@ -41,9 +41,10 @@ const db = {
   async getOrders() {
     const { data, error } = await supabaseClient
       .from("special_orders")
-      .select("*, lines:special_order_lines(*)")
+      .select("*, lines:special_order_lines(*), status_log:order_status_log(*)")
       .order("ship_date", { ascending: true })
-      .order("id", { foreignTable: "special_order_lines", ascending: true });
+      .order("id", { foreignTable: "special_order_lines", ascending: true })
+      .order("changed_at", { foreignTable: "order_status_log", ascending: false });
     if (error) throw error;
     return data;
   },
@@ -97,15 +98,23 @@ const db = {
     if (error) throw error;
   },
 
-  async updateOrderStatus(id, status) {
-    const { data, error } = await supabaseClient
+  async changeOrderStatus(id, oldStatus, newStatus, changedBy) {
+    const { data: order, error: orderError } = await supabaseClient
       .from("special_orders")
-      .update({ status })
+      .update({ status: newStatus })
       .eq("id", id)
       .select()
       .single();
-    if (error) throw error;
-    return data;
+    if (orderError) throw orderError;
+
+    const { data: logEntry, error: logError } = await supabaseClient
+      .from("order_status_log")
+      .insert({ order_id: id, old_status: oldStatus, new_status: newStatus, changed_by: changedBy })
+      .select()
+      .single();
+    if (logError) throw logError;
+
+    return { order, logEntry };
   },
 
   async getCustomers() {
