@@ -116,6 +116,8 @@ function cacheEls() {
   els.statusFilter = document.getElementById("status-filter");
   els.dateFieldSelect = document.getElementById("date-field-select");
   els.sortOrder = document.getElementById("sort-order");
+  els.customerSearch = document.getElementById("customer-search");
+  els.clearCustomerSearchBtn = document.getElementById("clear-customer-search-btn");
   els.dayFilter = document.getElementById("day-filter");
   els.clearDayFilterBtn = document.getElementById("clear-day-filter-btn");
   els.flaggedOnly = document.getElementById("flagged-only");
@@ -157,6 +159,16 @@ function bindStaticEvents() {
   els.dateFieldSelect.addEventListener("change", renderOrders);
   els.sortOrder.addEventListener("change", renderOrders);
   els.flaggedOnly.addEventListener("change", renderOrders);
+
+  els.customerSearch.addEventListener("input", () => {
+    els.clearCustomerSearchBtn.hidden = !els.customerSearch.value;
+    renderOrders();
+  });
+  els.clearCustomerSearchBtn.addEventListener("click", () => {
+    els.customerSearch.value = "";
+    els.clearCustomerSearchBtn.hidden = true;
+    renderOrders();
+  });
 
   els.dayFilter.addEventListener("change", () => {
     els.clearDayFilterBtn.hidden = !els.dayFilter.value;
@@ -477,6 +489,7 @@ function renderOrders() {
   const sortDir = els.sortOrder.value;
   const flaggedOnly = els.flaggedOnly.checked;
   const dayValue = els.dayFilter.value;
+  const searchValue = els.customerSearch.value.trim().toLowerCase();
 
   let visible = orders.filter((o) => {
     if (statusValue === "ALL") return true;
@@ -484,6 +497,7 @@ function renderOrders() {
     return o.status === statusValue;
   });
   if (flaggedOnly) visible = visible.filter(orderHasFlaggedLine);
+  if (searchValue) visible = visible.filter((o) => o.customer.toLowerCase().includes(searchValue));
   if (packTodayOnly) {
     const todayKey = localDateKey(new Date());
     visible = visible.filter((o) => o.pack_by_date && localDateKey(new Date(o.pack_by_date)) === todayKey);
