@@ -7,13 +7,13 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Order Tracker</title>
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
 <header class="app-header">
   <h1>Order Tracker</h1>
-  <span id="build-version" class="build-version">Build: v1.7</span>
+  <span id="build-version" class="build-version">Build: v1.8</span>
   <button id="check-updates-btn" class="btn btn-secondary btn-check-updates" type="button">&#8635; Check for updates</button>
   <button id="new-order-btn" class="btn btn-primary">+ New Order</button>
 </header>
@@ -59,6 +59,13 @@
       <input type="checkbox" id="flagged-only">
       Flagged only
     </label>
+  </div>
+
+  <div class="field-group pack-today-group">
+    <div class="day-filter-row">
+      <button type="button" id="pack-today-btn" class="btn btn-secondary">Orders to Pack Today</button>
+      <button type="button" id="clear-pack-today-btn" class="btn btn-secondary" hidden>Show all orders</button>
+    </div>
   </div>
 </div>
 
@@ -203,6 +210,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="supabase-client.js?v=7"></script>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

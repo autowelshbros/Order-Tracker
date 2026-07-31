@@ -255,7 +255,7 @@ textarea {
   height: 20px;
 }
 
-.flag-filter-group {
+.flag-filter-group, .pack-today-group {
   justify-content: flex-end;
 }
 

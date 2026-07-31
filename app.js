@@ -63,6 +63,7 @@ async function forceReloadBypassCache() {
 let orders = [];
 let customers = [];
 let editingOrderId = null;
+let packTodayOnly = false;
 
 const els = {};
 
@@ -117,6 +118,8 @@ function cacheEls() {
   els.dayFilter = document.getElementById("day-filter");
   els.clearDayFilterBtn = document.getElementById("clear-day-filter-btn");
   els.flaggedOnly = document.getElementById("flagged-only");
+  els.packTodayBtn = document.getElementById("pack-today-btn");
+  els.clearPackTodayBtn = document.getElementById("clear-pack-today-btn");
 
   els.orderList = document.getElementById("order-list");
   els.emptyState = document.getElementById("empty-state");
@@ -155,6 +158,26 @@ function bindStaticEvents() {
     els.clearDayFilterBtn.hidden = true;
     renderOrders();
   });
+
+  els.packTodayBtn.addEventListener("click", () => {
+    packTodayOnly = true;
+    els.dayFilter.value = "";
+    els.clearDayFilterBtn.hidden = true;
+    updatePackTodayUI();
+    renderOrders();
+  });
+  els.clearPackTodayBtn.addEventListener("click", () => {
+    packTodayOnly = false;
+    updatePackTodayUI();
+    renderOrders();
+  });
+}
+
+function updatePackTodayUI() {
+  els.packTodayBtn.hidden = packTodayOnly;
+  els.clearPackTodayBtn.hidden = !packTodayOnly;
+  els.dateFieldSelect.disabled = packTodayOnly;
+  els.dayFilter.disabled = packTodayOnly;
 }
 
 function localDateKey(date) {
@@ -397,7 +420,7 @@ function orderHasFlaggedLine(order) {
 
 function renderOrders() {
   const statusValue = els.statusFilter.value;
-  const dateField = els.dateFieldSelect.value;
+  const dateField = packTodayOnly ? "pack_by_date" : els.dateFieldSelect.value;
   const sortDir = els.sortOrder.value;
   const flaggedOnly = els.flaggedOnly.checked;
   const dayValue = els.dayFilter.value;
@@ -408,7 +431,12 @@ function renderOrders() {
     return o.status === statusValue;
   });
   if (flaggedOnly) visible = visible.filter(orderHasFlaggedLine);
-  if (dayValue) visible = visible.filter((o) => localDateKey(new Date(o[dateField])) === dayValue);
+  if (packTodayOnly) {
+    const todayKey = localDateKey(new Date());
+    visible = visible.filter((o) => o.pack_by_date && localDateKey(new Date(o.pack_by_date)) === todayKey);
+  } else if (dayValue) {
+    visible = visible.filter((o) => localDateKey(new Date(o[dateField])) === dayValue);
+  }
 
   visible.sort((a, b) => {
     const diff = new Date(a[dateField]) - new Date(b[dateField]);
