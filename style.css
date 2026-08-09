@@ -28,6 +28,10 @@
 
   --radius: 10px;
   --tap-min: 44px;
+
+  /* Measured from the real header at runtime so the sticky filter panel always
+     pins directly below it, whatever the header wraps to. */
+  --header-h: 72px;
 }
 
 * {
@@ -169,7 +173,7 @@ button, input, select, textarea {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
-  top: 56px;
+  top: var(--header-h);
   z-index: 9;
 }
 
@@ -628,23 +632,46 @@ input[type="search"]::-webkit-search-cancel-button {
 /* Small screens / handheld scanners (Zebra TC21 ~ 720px wide) */
 
 @media (max-width: 480px) {
+  /* Title and build stamp share one column so the header stays a single
+     button-height row instead of wrapping to three. */
   .app-header {
-    flex-wrap: wrap;
-    row-gap: 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "title   updates new-order"
+      "version updates new-order";
+    align-items: center;
+    column-gap: 6px;
+    padding: 8px 12px;
   }
 
   .app-header h1 {
-    font-size: 1.1rem;
+    grid-area: title;
+    /* Shrinks just enough to stay on one line down to 320px wide. */
+    font-size: clamp(0.9rem, 4.6vw, 1.05rem);
+    align-self: end;
   }
 
   .build-version {
-    margin-left: 0;
-    order: 3;
-    flex: 1 1 100%;
+    grid-area: version;
+    align-self: start;
+    margin: 0;
+    font-size: 0.65rem;
   }
 
-  .filter-panel {
-    top: 52px;
+  .btn-check-updates {
+    grid-area: updates;
+    padding: 10px 14px;
+    font-size: 1.05rem;
+  }
+
+  .btn-check-updates .btn-label {
+    display: none;
+  }
+
+  #new-order-btn {
+    grid-area: new-order;
+    padding: 10px 12px;
   }
 
   .filter-body {

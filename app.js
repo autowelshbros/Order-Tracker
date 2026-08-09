@@ -73,6 +73,7 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   cacheEls();
   bindStaticEvents();
+  watchHeaderHeight();
 
   try {
     [customers, orders] = await Promise.all([db.getCustomers(), db.getOrders()]);
@@ -89,6 +90,7 @@ async function init() {
 }
 
 function cacheEls() {
+  els.appHeader = document.querySelector(".app-header");
   els.newOrderBtn = document.getElementById("new-order-btn");
   els.checkUpdatesBtn = document.getElementById("check-updates-btn");
   els.orderModal = document.getElementById("order-modal");
@@ -206,6 +208,23 @@ function bindStaticEvents() {
     updatePackTodayUI();
     renderOrders();
   });
+}
+
+// The filter panel sticks below the header, so its offset has to track the
+// header's real height rather than a hardcoded guess that breaks when the
+// header wraps at narrow widths.
+function syncHeaderOffset() {
+  const height = els.appHeader.getBoundingClientRect().height;
+  document.documentElement.style.setProperty("--header-h", `${Math.round(height)}px`);
+}
+
+function watchHeaderHeight() {
+  syncHeaderOffset();
+  if (window.ResizeObserver) {
+    new ResizeObserver(syncHeaderOffset).observe(els.appHeader);
+  } else {
+    window.addEventListener("resize", syncHeaderOffset);
+  }
 }
 
 // --- Collapsible filter panel ---
