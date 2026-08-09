@@ -113,6 +113,10 @@ function cacheEls() {
   els.notesInput = document.getElementById("notes-input");
   els.createdByInput = document.getElementById("created-by-input");
 
+  els.filterToggle = document.getElementById("filter-toggle");
+  els.filterBody = document.getElementById("filter-body");
+  els.activeFilterCount = document.getElementById("active-filter-count");
+
   els.statusFilter = document.getElementById("status-filter");
   els.dateFieldSelect = document.getElementById("date-field-select");
   els.sortOrder = document.getElementById("sort-order");
@@ -154,6 +158,10 @@ function bindStaticEvents() {
   });
 
   els.addLineBtn.addEventListener("click", () => addLineRow());
+
+  els.filterToggle.addEventListener("click", () => {
+    setFiltersExpanded(els.filterToggle.getAttribute("aria-expanded") !== "true");
+  });
 
   els.statusFilter.addEventListener("change", renderOrders);
   els.dateFieldSelect.addEventListener("change", renderOrders);
@@ -198,6 +206,33 @@ function bindStaticEvents() {
     updatePackTodayUI();
     renderOrders();
   });
+}
+
+// --- Collapsible filter panel ---
+
+function setFiltersExpanded(expanded) {
+  els.filterToggle.setAttribute("aria-expanded", String(expanded));
+  els.filterBody.hidden = !expanded;
+}
+
+// Counts filters that differ from their default, so the collapsed bar can show
+// how much filtering is in effect without expanding it.
+function countActiveFilters() {
+  let count = 0;
+  if (els.statusFilter.value !== "ACTIVE") count += 1;
+  if (els.dateFieldSelect.value !== "pack_by_date") count += 1;
+  if (els.sortOrder.value !== "asc") count += 1;
+  if (els.customerSearch.value.trim()) count += 1;
+  if (els.dayFilter.value) count += 1;
+  if (els.flaggedOnly.checked) count += 1;
+  if (packTodayOnly) count += 1;
+  return count;
+}
+
+function updateActiveFilterCount() {
+  const count = countActiveFilters();
+  els.activeFilterCount.textContent = String(count);
+  els.activeFilterCount.hidden = count === 0;
 }
 
 function updatePackTodayUI() {
@@ -484,6 +519,8 @@ function orderHasFlaggedLine(order) {
 }
 
 function renderOrders() {
+  updateActiveFilterCount();
+
   const statusValue = els.statusFilter.value;
   const dateField = packTodayOnly ? "pack_by_date" : els.dateFieldSelect.value;
   const sortDir = els.sortOrder.value;

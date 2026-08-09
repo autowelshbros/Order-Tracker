@@ -7,73 +7,86 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Order Tracker</title>
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 
 <header class="app-header">
   <h1>Order Tracker</h1>
-  <span id="build-version" class="build-version">Build: v1.10</span>
+  <span id="build-version" class="build-version">Build: v1.11</span>
   <button id="check-updates-btn" class="btn btn-secondary btn-check-updates" type="button">&#8635; Check for updates</button>
   <button id="new-order-btn" class="btn btn-primary">+ New Order</button>
 </header>
 
-<div class="toolbar">
-  <div class="field-group">
-    <label for="status-filter">Status</label>
-    <select id="status-filter">
-      <option value="ACTIVE" selected>Active (Open + Packed)</option>
-      <option value="ALL">All</option>
-      <option value="OPEN">Open</option>
-      <option value="PACKED">Packed</option>
-      <option value="SHIPPED">Shipped</option>
-    </select>
-  </div>
+<div class="filter-panel">
+  <button type="button" id="filter-toggle" class="filter-bar" aria-expanded="false" aria-controls="filter-body">
+    <span class="filter-bar-main">
+      <svg class="filter-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M3 5h18l-7 8.2V21l-4-2.2v-5.6z" fill="currentColor"></path>
+      </svg>
+      <span>Filters</span>
+      <span id="active-filter-count" class="filter-count" title="Active filters" hidden>0</span>
+    </span>
+    <svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+  </button>
 
-  <div class="field-group">
-    <label for="date-field-select">Group by</label>
-    <select id="date-field-select">
-      <option value="pack_by_date" selected>Pack date</option>
-      <option value="ship_date">Ship date</option>
-    </select>
-  </div>
+  <div id="filter-body" class="filter-body" hidden>
+    <div class="field-group">
+      <label for="status-filter">Status</label>
+      <select id="status-filter">
+        <option value="ACTIVE" selected>Active (Open + Packed)</option>
+        <option value="ALL">All</option>
+        <option value="OPEN">Open</option>
+        <option value="PACKED">Packed</option>
+        <option value="SHIPPED">Shipped</option>
+      </select>
+    </div>
 
-  <div class="field-group">
-    <label for="sort-order">Sort</label>
-    <select id="sort-order">
-      <option value="asc">Soonest first</option>
-      <option value="desc">Latest first</option>
-    </select>
-  </div>
+    <div class="field-group">
+      <label for="date-field-select">Group by</label>
+      <select id="date-field-select">
+        <option value="pack_by_date" selected>Pack date</option>
+        <option value="ship_date">Ship date</option>
+      </select>
+    </div>
 
-  <div class="field-group">
-    <label for="customer-search">Customer</label>
-    <div class="day-filter-row">
-      <input type="search" id="customer-search" placeholder="Search customer…" autocomplete="off">
-      <button type="button" id="clear-customer-search-btn" class="btn btn-secondary" hidden>&times;</button>
+    <div class="field-group">
+      <label for="sort-order">Sort</label>
+      <select id="sort-order">
+        <option value="asc">Soonest first</option>
+        <option value="desc">Latest first</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label for="customer-search">Customer</label>
+      <div class="day-filter-row">
+        <input type="search" id="customer-search" placeholder="Search customer…" autocomplete="off">
+        <button type="button" id="clear-customer-search-btn" class="btn btn-secondary" hidden>&times;</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="day-filter">Day</label>
+      <div class="day-filter-row">
+        <input type="date" id="day-filter">
+        <button type="button" id="clear-day-filter-btn" class="btn btn-secondary" hidden>All days</button>
+      </div>
+    </div>
+
+    <div class="field-group flag-filter-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="flagged-only">
+        Flagged only
+      </label>
     </div>
   </div>
 
-  <div class="field-group">
-    <label for="day-filter">Day</label>
-    <div class="day-filter-row">
-      <input type="date" id="day-filter">
-      <button type="button" id="clear-day-filter-btn" class="btn btn-secondary" hidden>All days</button>
-    </div>
-  </div>
-
-  <div class="field-group flag-filter-group">
-    <label class="checkbox-label">
-      <input type="checkbox" id="flagged-only">
-      Flagged only
-    </label>
-  </div>
-
-  <div class="field-group pack-today-group">
-    <div class="day-filter-row">
-      <button type="button" id="pack-today-btn" class="btn btn-secondary">Orders to Pack Today</button>
-      <button type="button" id="clear-pack-today-btn" class="btn btn-secondary" hidden>Show all orders</button>
-    </div>
+  <div class="filter-quick-row">
+    <button type="button" id="pack-today-btn" class="btn btn-secondary">Orders to Pack Today</button>
+    <button type="button" id="clear-pack-today-btn" class="btn btn-secondary" hidden>Show all orders</button>
   </div>
 </div>
 
@@ -255,7 +268,7 @@
 </template>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase-client.js?v=10"></script>
-<script src="app.js?v=10"></script>
+<script src="supabase-client.js?v=11"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>
